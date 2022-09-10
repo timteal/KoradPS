@@ -173,7 +173,7 @@ def testPS():
 		ps.on()
 
 def stream():
-	ser = serial.Serial(port='/dev/cu.usbmodem00368207024E1', baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=1)
+	ser = serial.Serial(port='/dev/ttyACM0', baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=1)
 	while True:
 		channel=1
 		cmd = "VOUT{}?".format(channel)
