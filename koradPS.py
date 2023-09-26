@@ -101,9 +101,13 @@ class KoradPS:
 		cmd = "SAV{}".format(setting)
 		self.send(cmd)
 
-	# OCP<X> - Over current. OCP1 sets OCP on, OCP0 to off, defaults to on
-	def ocp(self, setting=1):
-		cmd = "OCP{}".format(setting)
+	# OCP<X> - Over current. OCP1 sets OCP on, OCP0 to off
+	def ocp_on(self):
+		cmd = "OCP1"
+		self.send(cmd)
+
+	def ocp_off(self):
+		cmd = "OCP0"
 		self.send(cmd)
 
 	# send() and read() do the actual serial communication for most of the other functions
