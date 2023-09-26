@@ -31,7 +31,6 @@ class KoradPS:
 		self.send(cmd)
 
 	def read_current_output(self, channel=1):
-
 		cmd = "IOUT{}?".format(channel)
 		return self.read(cmd)
 
