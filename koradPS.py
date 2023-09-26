@@ -6,11 +6,6 @@ The KoradPS class implements all the serial commands the power supply uses.
 Presumably this will work for all KD3000/6000 power supplies since I think the serial commands are the same.
 (It can handle multiple channels but defaults to 1), but I've only tested this on my KD3005P, so... Caveat User.
 
-There are also some functions defined outside of the class that I find helpful on occasion. They are more script-y and less polished,
-I just modify them as needed.
-	testPS() puts the power supply (and the code) through most of it's paces and was mainly written for debugging
-	stream() is just that, constantly reads the voltage and current output, fast-ish. 
-
 '''
 
 
@@ -24,7 +19,6 @@ class KoradPS:
 		self.ser = serial.Serial(port=port, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=1)
 		self.responseTime = 0.050 # per the manual response time is 50ms. 
 
-	# iset() sets the current limit, or returns the limit setting if no "amps" value is passed
 	# ISET<X>:<parameter> - Set Current Limit, example ISET1:3.5 sets the channel 1 current limit to 3.5A
 	# ISET<X>? - Return Current Limit setting
 	# IOUT<X>? - Return actual output current
@@ -41,7 +35,6 @@ class KoradPS:
 		cmd = "IOUT{}?".format(channel)
 		return self.read(cmd)
 
-	# vset() sets the voltage limit, or returns the limit setting if no "volts" value is passed
 	# VSET<X>:<parameter> - Set Voltage Limit
 	# VSET<X>? - Return Voltage Limit setting
 	# VOUT<X>? - Return actual output voltage
@@ -122,68 +115,3 @@ class KoradPS:
 		self.ser.write(cmd.encode())
 		response = self.ser.read(5)
 		return float(response.decode())
-
-
-
-
-'''
---- outside of class functions below here ---
-'''
-
-def testPS():
-	# simple test function
-	#	calls all the KoradPS functions at some point in the test
-	#	cycles the power supply from 0 to 5V 
-	#	reads the actual voltage and current outputs periodically
-	#	typically I'll connect the power supply output to a load like a dc motor
-
-	ps = KoradPS(port='/dev/cu.usbmodem00368207024E1')
-
-	print(ps.id())
-
-	ps.iset(.4)
-	ps.on()
-	ps.ocp()
-
-	while(True):
-		print(ps.status())
-		for i in range(0,30,3):
-			ps.vset(i/6)
-			if (i==6):
-				ps.save(setting=1)
-				ps.on()
-			if (i==18):
-				ps.recall(setting=1)
-				ps.on()
-			print("Settings: {}V, {}A. Output: {}V, {}A".format(ps.vset(),ps.iset(),ps.vout(),ps.iout()))
-			time.sleep(2)
-
-		ps.off()
-		print("Waiting 3 seconds..")
-		print(ps.status())
-		time.sleep(3)
-		ps.on()
-
-def stream():
-	ser = serial.Serial(port='/dev/ttyACM0', baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=1)
-	while True:
-		channel=1
-		cmd = "VOUT{}?".format(channel)
-		ser.write(cmd.encode())
-		volts = ser.read(5)
-		cmd = "IOUT{}?".format(channel)
-		ser.write(cmd.encode())
-		amps = ser.read(5)
-		print("V: {}V C: {}A".format(volts.decode(),amps.decode()))
-		time.sleep(.1)
-
-
-
-
-if __name__ == "__main__":
-
-	testPS()
-	#stream()
-
-
-
